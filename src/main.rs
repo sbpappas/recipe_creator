@@ -1,3 +1,5 @@
+// application entry point — wiring the router, middleware, state, and launching the Axum server
+
 mod auth;
 mod config;
 mod db;

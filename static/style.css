@@ -13,6 +13,39 @@
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 
+/* Loading overlay for long-running recipe generation */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.loading-overlay.active {
+  display: flex;
+}
+.loading-box {
+  background: var(--surface);
+  padding: 1.25rem 1.5rem;
+  border-radius: 14px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+.loading-box .spinner-large {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid rgba(0,0,0,0.08);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.loading-box .loading-text {
+  font-weight: 600;
+}
 * {
   box-sizing: border-box;
 }
