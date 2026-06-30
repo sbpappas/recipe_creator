@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "register" %}Register{% else %}Login{% endif %} · Pantry Chef{% endblock %}
+{% block content %}
+<section class="card auth-card">
+  <h1>{% if mode == "register" %}Create account{% else %}Welcome back{% endif %}</h1>
+  <p class="muted">Save your pantry staples and generate recipes from what you have on hand.</p>
+
+  {% if error.is_some() %}
+  <div class="alert">{{ error.as_ref().unwrap() }}</div>
+  {% endif %}
+
+  <form method="post" action="{% if mode == "register" %}/register{% else %}/login{% endif %}">
+    <label>
+      Username
+      <input type="text" name="username" required autocomplete="username">
+    </label>
+    <label>
+      Password
+      <input type="password" name="password" required autocomplete="{% if mode == "register" %}new-password{% else %}current-password{% endif %}">
+    </label>
+    <button type="submit" class="primary">{% if mode == "register" %}Register{% else %}Log in{% endif %}</button>
+  </form>
+
+  <p class="muted switch-auth">
+    {% if mode == "register" %}
+    Already have an account? <a href="/login">Log in</a>
+    {% else %}
+    New here? <a href="/register">Create an account</a>
+    {% endif %}
+  </p>
+</section>
+{% endblock %}

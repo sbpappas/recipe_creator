@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Recipe history · Pantry Chef{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Recipe history</h1>
+    <p class="muted">Recipes you've generated before.</p>
+  </div>
+  <a class="button primary" href="/recipes/new">Generate recipe</a>
+</section>
+
+<section class="card">
+  {% if recipes.is_empty() %}
+  <p class="empty">No recipes yet. <a href="/recipes/new">Generate your first one</a>.</p>
+  {% else %}
+  <ul class="history-list">
+    {% for recipe in recipes %}
+    <li>
+      <a href="/recipes/{{ recipe.id }}">
+        <span class="history-title">{{ recipe.title }}</span>
+        <span class="history-meta">{{ recipe.meal_type }} · {{ recipe.created_at }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endblock %}

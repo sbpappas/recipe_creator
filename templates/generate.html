@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Generate recipe · Pantry Chef{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Generate a recipe</h1>
+    <p class="muted">Using {{ pantry_count }} pantry staple{% if pantry_count != 1 %}s{% endif %} from your list.</p>
+  </div>
+</section>
+
+{% if !gemini_configured %}
+<div class="alert">GEMINI_API_KEY is not configured. Add it to your <code>.env</code> file and restart the app.</div>
+{% endif %}
+
+{% if error.is_some() %}
+<div class="alert">{{ error.as_ref().unwrap() }}</div>
+{% endif %}
+
+<section class="card">
+  <form method="post" action="/recipes/new" class="generate-form"
+        hx-post="/recipes/new" hx-indicator=".spinner">
+    <label>
+      Meal type
+      <select name="meal_type" required>
+        <option value="breakfast">Breakfast</option>
+        <option value="lunch">Lunch</option>
+        <option value="dinner" selected>Dinner</option>
+        <option value="snack">Snack</option>
+        <option value="dessert">Dessert</option>
+      </select>
+    </label>
+
+    <label>
+      Must-use ingredients <span class="muted">(optional, comma-separated)</span>
+      <input type="text" name="must_use" placeholder="chicken thighs, spinach">
+    </label>
+
+    <label>
+      Notes <span class="muted">(optional)</span>
+      <textarea name="notes" rows="3" placeholder="30 minutes max, no dairy, kid-friendly"></textarea>
+    </label>
+
+    <button type="submit" class="primary" {% if !gemini_configured %}disabled{% endif %}>
+      <span class="btn-label">Generate recipe</span>
+      <span class="htmx-indicator spinner" aria-hidden="true"></span>
+    </button>
+  </form>
+</section>
+{% endblock %}

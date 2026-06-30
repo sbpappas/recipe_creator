@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ recipe.title }} · Pantry Chef{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">{{ meal_type }}</p>
+    <h1>{{ recipe.title }}</h1>
+    <p class="muted">
+      Serves {{ recipe.servings }} · Prep {{ recipe.prep_minutes }} min · Cook {{ recipe.cook_minutes }} min
+    </p>
+  </div>
+  <div class="actions">
+    <a class="button" href="/recipes/new">Generate another</a>
+    <a class="button" href="/recipes/history">History</a>
+  </div>
+</section>
+
+<section class="recipe-grid">
+  <article class="card">
+    <h2>Ingredients</h2>
+    <ul class="ingredient-list">
+      {% for ing in recipe.ingredients %}
+      <li><strong>{{ ing.amount }}</strong> {{ ing.item }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Steps</h2>
+    <ol class="step-list">
+      {% for step in recipe.steps %}
+      <li>{{ step }}</li>
+      {% endfor %}
+    </ol>
+  </article>
+
+  <article class="card">
+    <h2>From your pantry</h2>
+    {% if recipe.pantry_used.is_empty() %}
+    <p class="muted">No pantry staples called out explicitly.</p>
+    {% else %}
+    <ul class="plain-list">
+      {% for item in recipe.pantry_used %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+
+  <article class="card">
+    <h2>Optional shopping</h2>
+    {% if recipe.shopping_optional.is_empty() %}
+    <p class="muted">You should have everything you need.</p>
+    {% else %}
+    <ul class="plain-list">
+      {% for item in recipe.shopping_optional %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

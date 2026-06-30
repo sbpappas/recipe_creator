@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Pantry · Pantry Chef{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Your pantry</h1>
+    <p class="muted">Staples you always have on hand. Recipes will prefer these ingredients.</p>
+  </div>
+  <a class="button primary" href="/recipes/new">Generate recipe</a>
+</section>
+
+{% if error.is_some() %}
+<div class="alert">{{ error.as_ref().unwrap() }}</div>
+{% endif %}
+
+<section class="card">
+  <form method="post" action="/pantry" class="inline-add">
+    <label class="sr-only" for="pantry-name">Add staple</label>
+    <input id="pantry-name" type="text" name="name" placeholder="e.g. olive oil, garlic, rice" required>
+    <button type="submit">Add</button>
+  </form>
+
+  {% if items.is_empty() %}
+  <p class="empty">No staples yet. Add a few basics you always keep stocked.</p>
+  {% else %}
+  <ul class="chip-list">
+    {% for item in items %}
+    <li class="chip">
+      <span>{{ item }}</span>
+      <form method="post" action="/pantry/delete">
+        <input type="hidden" name="name" value="{{ item }}">
+        <button type="submit" aria-label="Remove {{ item }}">×</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endblock %}
