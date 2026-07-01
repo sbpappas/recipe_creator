@@ -1,6 +1,6 @@
 # Pantry Chef
 
-A small Rust web app for creating recipes from what you already have on hand. Save your pantry staples, pick a meal type, optionally name ingredients you want to use, and let Google Gemini generate a recipe.
+A small Rust web app for creating recipes from what you already have on hand in your home. Save your pantry staples, pick a meal type, optionally name ingredients you want to use, and generate a recipe.
 
 Built for personal and family use: one binary, one SQLite file, zero hosting cost.
 
@@ -10,7 +10,7 @@ Built for personal and family use: one binary, one SQLite file, zero hosting cos
 - Save always-on-hand pantry staples
 - Generate recipes by meal type with optional must-use ingredients and notes
 - View saved recipe history
-- Powered by Gemini free tier (`gemini-2.0-flash`)
+- Powered by Gemini free tier (`gemini-2.5-flash`)
 
 ## Quick start
 
