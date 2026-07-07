@@ -22,31 +22,61 @@ document.addEventListener('DOMContentLoaded', function () {
     if (overlay) overlay.classList.remove('active');
   }
 
+  function isRecipeGenerationForm(form) {
+    if (!(form instanceof HTMLFormElement)) return false;
+    const action = (form.getAttribute('action') || form.getAttribute('hx-post') || window.location.pathname).trim();
+    return action === '/recipes/new' || action.endsWith('/recipes/new');
+  }
+
   // Show loading for any internal recipe link navigation
   document.addEventListener('click', function (e) {
     const a = e.target.closest('a');
     if (!a) return;
     const href = a.getAttribute('href');
     if (!href) return;
-    // Only intercept internal recipe show links
     if (href.startsWith('/recipes/') && !href.includes('/new')) {
       showLoading();
-      // Let the navigation proceed; hide after a short timeout in case navigation fails
       setTimeout(hideLoading, 15000);
     }
   });
 
-  // Show the overlay for recipe generation submissions, whether they use htmx or a normal form post
+  document.addEventListener('click', function (e) {
+    const button = e.target.closest('button[type="submit"], input[type="submit"]');
+    if (!button) return;
+    const form = button.closest('form');
+    if (isRecipeGenerationForm(form)) {
+      showLoading();
+    }
+  }, true);
+
   document.addEventListener('submit', function (e) {
     const form = e.target;
-    if (!(form instanceof HTMLFormElement)) return;
-    const action = form.getAttribute('action') || window.location.pathname;
-    if (action === '/recipes/new') {
+    if (isRecipeGenerationForm(form)) {
       showLoading();
-      setTimeout(hideLoading, 15000);
     }
   });
 
-  // Hide overlay when page is shown (e.g., after navigation)
+  document.addEventListener('htmx:beforeRequest', function (e) {
+    const form = e.target;
+    if (isRecipeGenerationForm(form)) {
+      showLoading();
+    }
+  });
+
+  document.addEventListener('htmx:afterRequest', function (e) {
+    const form = e.target;
+    if (isRecipeGenerationForm(form)) {
+      hideLoading();
+    }
+  });
+
+  document.addEventListener('htmx:responseError', function (e) {
+    const form = e.target;
+    if (isRecipeGenerationForm(form)) {
+      hideLoading();
+    }
+  });
+
+  window.addEventListener('load', hideLoading);
   window.addEventListener('pageshow', hideLoading);
 });
