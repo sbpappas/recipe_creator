@@ -36,12 +36,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // For forms (htmx handles its own indicator), but ensure non-htmx submissions show overlay
+  // Show the overlay for recipe generation submissions, whether they use htmx or a normal form post
   document.addEventListener('submit', function (e) {
     const form = e.target;
     if (!(form instanceof HTMLFormElement)) return;
     const action = form.getAttribute('action') || window.location.pathname;
-    if (action === '/recipes/new' && !form.hasAttribute('hx-post')) {
+    if (action === '/recipes/new') {
       showLoading();
       setTimeout(hideLoading, 15000);
     }

@@ -46,6 +46,13 @@
 .loading-box .loading-text {
   font-weight: 600;
 }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 * {
   box-sizing: border-box;
 }
