@@ -92,6 +92,3 @@ For cross-platform binaries, use GitHub Actions or `cargo-zigbuild` to produce m
 | `DATABASE_URL` | no | SQLite URL (default `sqlite:data/recipe_creator.db?mode=rwc`) |
 | `GEMINI_MODEL` | no | Gemini model name (default `gemini-2.0-flash`) |
 
-## License
-
-MIT (or your choice — update as needed)
