@@ -3,3 +3,5 @@
 .env.example
 /data/*.db
 /data/*.db-*
+dist/
+
