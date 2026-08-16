@@ -42,7 +42,7 @@ GEMINI_MODEL=gemini-2.0-flash
 ### 3. Run locally
 
 ```bash
-cargo run
+cargo run --bin recipe_creator
 ```
 
 Open [http://localhost:8090](http://localhost:8090), register, add pantry items, and generate a recipe.
@@ -91,4 +91,32 @@ For cross-platform binaries, use GitHub Actions or `cargo-zigbuild` to produce m
 | `PORT` | no | HTTP port (default `8090`) |
 | `DATABASE_URL` | no | SQLite URL (default `sqlite:data/recipe_creator.db?mode=rwc`) |
 | `GEMINI_MODEL` | no | Gemini model name (default `gemini-2.0-flash`) |
+
+
+## Password reset helper (this was a later fix to me forgetting my password)
+
+A small helper binary is provided to reset a local user's password.
+
+- File: [src/bin/reset_password.rs](src/bin/reset_password.rs#L1-L200)
+
+Usage (from the project root):
+
+- Non-interactive (passing password on the command line):
+```bash
+cargo run --bin reset_password -- <username> <new-password>
+```
+
+- Interactive (secure, no-echo prompt — recommended):
+```bash
+cargo run --bin reset_password -- <username>
+# you'll be prompted to enter and confirm the new password
+```
+
+Notes:
+- The tool reads `DATABASE_URL` from `.env` or defaults to `sqlite:data/recipe_creator.db?mode=rwc`.
+- Back up your DB before running:
+```bash
+cp data/recipe_creator.db data/recipe_creator.db.bak
+```
+- Interactive mode avoids exposing the password in shell history or process listings.
 
