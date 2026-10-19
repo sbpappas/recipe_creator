@@ -14,12 +14,14 @@ use crate::{
         session::{clear_user_cookie, set_user_cookie, user_id_from_jar},
     },
     error::{render, AppError, AppResult},
+    i18n::{Lang, Strings},
     state::AppState,
 };
 
 #[derive(Template)]
 #[template(path = "login.html")]
 struct LoginTemplate {
+    t: &'static Strings,
     username: Option<String>,
     mode: &'static str,
     error: Option<String>,
@@ -52,16 +54,18 @@ async fn home(jar: PrivateCookieJar) -> Response {
     }
 }
 
-async fn login_page(Query(query): Query<ErrorQuery>) -> AppResult<Response> {
+async fn login_page(jar: PrivateCookieJar, Query(query): Query<ErrorQuery>) -> AppResult<Response> {
     render(LoginTemplate {
+        t: Lang::from_jar(&jar).t(),
         username: None,
         mode: "login",
         error: query.error,
     })
 }
 
-async fn register_page(Query(query): Query<ErrorQuery>) -> AppResult<Response> {
+async fn register_page(jar: PrivateCookieJar, Query(query): Query<ErrorQuery>) -> AppResult<Response> {
     render(LoginTemplate {
+        t: Lang::from_jar(&jar).t(),
         username: None,
         mode: "register",
         error: query.error,
@@ -77,7 +81,7 @@ async fn login(
     let password = form.password.trim();
 
     if username.is_empty() || password.is_empty() {
-        return Ok(Redirect::to("/login?error=Username+and+password+are+required").into_response());
+        return Ok(Redirect::to("/login?error=missing_credentials").into_response());
     }
 
     let user = sqlx::query_as::<_, UserRow>(
@@ -88,11 +92,11 @@ async fn login(
     .await?;
 
     let Some(user) = user else {
-        return Ok(Redirect::to("/login?error=Invalid+username+or+password").into_response());
+        return Ok(Redirect::to("/login?error=invalid_credentials").into_response());
     };
 
     if !verify_password(password, &user.password_hash) {
-        return Ok(Redirect::to("/login?error=Invalid+username+or+password").into_response());
+        return Ok(Redirect::to("/login?error=invalid_credentials").into_response());
     }
 
     let jar = set_user_cookie(jar, user.id);
@@ -109,13 +113,13 @@ async fn register(
 
     if username.len() < 3 {
         return Ok(
-            Redirect::to("/register?error=Username+must+be+at+least+3+characters").into_response(),
+            Redirect::to("/register?error=username_too_short").into_response(),
         );
     }
 
     if password.len() < 6 {
         return Ok(
-            Redirect::to("/register?error=Password+must+be+at+least+6+characters").into_response(),
+            Redirect::to("/register?error=password_too_short").into_response(),
         );
     }
 
@@ -134,7 +138,7 @@ async fn register(
             Ok((jar, Redirect::to("/pantry")).into_response())
         }
         Err(sqlx::Error::Database(db_err)) if db_err.is_unique_violation() => Ok(Redirect::to(
-            "/register?error=That+username+is+already+taken",
+            "/register?error=username_taken",
         )
             .into_response()),
         Err(e) => Err(e.into()),

@@ -4,6 +4,7 @@ mod auth;
 mod config;
 mod db;
 mod error;
+mod i18n;
 mod llm;
 mod pantry;
 mod recipes;
@@ -41,6 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> { //turns on the loggi
 
     let public = Router::new()
         .merge(auth::routes::router())
+        .merge(i18n::router())
         .nest_service("/static", ServeDir::new("static"));
 
     let protected = Router::new()

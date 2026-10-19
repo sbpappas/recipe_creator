@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-{% block title %}{% if mode == "register" %}Register{% else %}Login{% endif %} · Pantry Chef{% endblock %}
+{% block title %}{% if mode == "register" %}{{ t.register_title }}{% else %}{{ t.login_title }}{% endif %} · Pantry Chef{% endblock %}
 {% block content %}
 <section class="card auth-card">
-  <h1>{% if mode == "register" %}Create account{% else %}Welcome back{% endif %}</h1>
-  <p class="muted">Save your pantry staples and generate recipes from what you have on hand.</p>
+  <h1>{% if mode == "register" %}{{ t.create_account_heading }}{% else %}{{ t.welcome_back }}{% endif %}</h1>
+  <p class="muted">{{ t.auth_intro }}</p>
 
   {% if error.is_some() %}
-  <div class="alert">{{ error.as_ref().unwrap() }}</div>
+  <div class="alert">{{ t.error(error.as_ref().unwrap()) }}</div>
   {% endif %}
 
   <form method="post" action="{% if mode == "register" %}/register{% else %}/login{% endif %}">
     <label>
-      Username
+      {{ t.username }}
       <input type="text" name="username" required autocomplete="username">
     </label>
     <label>
-      Password
+      {{ t.password }}
       <input type="password" name="password" required autocomplete="{% if mode == "register" %}new-password{% else %}current-password{% endif %}">
     </label>
-    <button type="submit" class="primary">{% if mode == "register" %}Register{% else %}Log in{% endif %}</button>
+    <button type="submit" class="primary">{% if mode == "register" %}{{ t.register_button }}{% else %}{{ t.login_button }}{% endif %}</button>
   </form>
 
   <p class="muted switch-auth">
     {% if mode == "register" %}
-    Already have an account? <a href="/login">Log in</a>
+    {{ t.have_account }} <a href="/login">{{ t.login_button }}</a>
     {% else %}
-    New here? <a href="/register">Create an account</a>
+    {{ t.new_here }} <a href="/register">{{ t.create_account_link }}</a>
     {% endif %}
   </p>
 </section>

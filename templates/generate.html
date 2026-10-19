@@ -1,47 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Generate recipe · Pantry Chef{% endblock %}
+{% block title %}{{ t.generate_recipe }} · Pantry Chef{% endblock %}
 {% block content %}
 <section class="page-header">
   <div>
-    <h1>Generate a recipe</h1>
-    <p class="muted">Using {{ pantry_count }} pantry staple{% if pantry_count != 1 %}s{% endif %} from your list.</p>
+    <h1>{{ t.generate_heading }}</h1>
+    <p class="muted">{{ t.pantry_count(pantry_count) }}</p>
   </div>
 </section>
 
 {% if !gemini_configured %}
-<div class="alert">GEMINI_API_KEY is not configured. Add it to your <code>.env</code> file and restart the app.</div>
+<div class="alert">{{ t.gemini_missing_html|safe }}</div>
 {% endif %}
 
 {% if error.is_some() %}
-<div class="alert">{{ error.as_ref().unwrap() }}</div>
+<div class="alert">{{ t.error(error.as_ref().unwrap()) }}</div>
 {% endif %}
 
 <section class="card">
   <form method="post" action="/recipes/new" class="generate-form"
         hx-post="/recipes/new" hx-indicator=".spinner">
     <label>
-      Meal type
+      {{ t.meal_type_label }}
       <select name="meal_type" required>
-        <option value="breakfast">Breakfast</option>
-        <option value="lunch">Lunch</option>
-        <option value="dinner" selected>Dinner</option>
-        <option value="snack">Snack</option>
-        <option value="dessert">Dessert</option>
+        <option value="breakfast">{{ t.meal_type("breakfast") }}</option>
+        <option value="lunch">{{ t.meal_type("lunch") }}</option>
+        <option value="dinner" selected>{{ t.meal_type("dinner") }}</option>
+        <option value="snack">{{ t.meal_type("snack") }}</option>
+        <option value="dessert">{{ t.meal_type("dessert") }}</option>
       </select>
     </label>
 
     <label>
-      Must-use ingredients <span class="muted">(optional, comma-separated)</span>
-      <input type="text" name="must_use" placeholder="chicken thighs, spinach">
+      {{ t.must_use_label }} <span class="muted">{{ t.must_use_hint }}</span>
+      <input type="text" name="must_use" placeholder="{{ t.must_use_placeholder }}">
     </label>
 
     <label>
-      Notes <span class="muted">(optional)</span>
-      <textarea name="notes" rows="3" placeholder="30 minutes max, no dairy, kid-friendly"></textarea>
+      {{ t.notes_label }} <span class="muted">{{ t.optional_hint }}</span>
+      <textarea name="notes" rows="3" placeholder="{{ t.notes_placeholder }}"></textarea>
     </label>
 
     <button type="submit" class="primary" {% if !gemini_configured %}disabled{% endif %}>
-      <span class="btn-label">Generate recipe</span>
+      <span class="btn-label">{{ t.generate_recipe }}</span>
       <span class="htmx-indicator spinner" aria-hidden="true"></span>
     </button>
   </form>

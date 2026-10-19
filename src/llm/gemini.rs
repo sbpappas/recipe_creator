@@ -92,6 +92,7 @@ fn system_prompt() -> String {
         "Create practical recipes using the user's pantry staples when possible.",
         "Only suggest extra shopping items when truly necessary.",
         "Respect the meal type, must-use ingredients, and any notes.",
+        "Write every text value (title, ingredients, amounts, steps, lists) in the language given by the `language` field; keep the JSON keys in English.",
         "Respond with valid JSON only, matching the requested schema.",
     ]
     .join(" ")

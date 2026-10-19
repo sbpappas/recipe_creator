@@ -3,21 +3,21 @@
 {% block content %}
 <section class="page-header">
   <div>
-    <p class="eyebrow">{{ meal_type }}</p>
+    <p class="eyebrow">{{ t.meal_type(meal_type.as_str()) }}</p>
     <h1>{{ recipe.title }}</h1>
     <p class="muted">
-      Serves {{ recipe.servings }} · Prep {{ recipe.prep_minutes }} min · Cook {{ recipe.cook_minutes }} min
+      {{ t.serves }} {{ recipe.servings }} · {{ t.prep }} {{ recipe.prep_minutes }} {{ t.minutes }} · {{ t.cook }} {{ recipe.cook_minutes }} {{ t.minutes }}
     </p>
   </div>
   <div class="actions">
-    <a class="button" href="/recipes/new">Generate another</a>
-    <a class="button" href="/recipes/history">History</a>
+    <a class="button" href="/recipes/new">{{ t.generate_another }}</a>
+    <a class="button" href="/recipes/history">{{ t.nav_history }}</a>
   </div>
 </section>
 
 <section class="recipe-grid">
   <article class="card">
-    <h2>Ingredients</h2>
+    <h2>{{ t.ingredients }}</h2>
     <ul class="ingredient-list">
       {% for ing in recipe.ingredients %}
       <li><strong>{{ ing.amount }}</strong> {{ ing.item }}</li>
@@ -26,7 +26,7 @@
   </article>
 
   <article class="card">
-    <h2>Steps</h2>
+    <h2>{{ t.steps }}</h2>
     <ol class="step-list">
       {% for step in recipe.steps %}
       <li>{{ step }}</li>
@@ -35,9 +35,9 @@
   </article>
 
   <article class="card">
-    <h2>From your pantry</h2>
+    <h2>{{ t.from_pantry }}</h2>
     {% if recipe.pantry_used.is_empty() %}
-    <p class="muted">No pantry staples called out explicitly.</p>
+    <p class="muted">{{ t.no_pantry_called_out }}</p>
     {% else %}
     <ul class="plain-list">
       {% for item in recipe.pantry_used %}
@@ -48,9 +48,9 @@
   </article>
 
   <article class="card">
-    <h2>Optional shopping</h2>
+    <h2>{{ t.optional_shopping }}</h2>
     {% if recipe.shopping_optional.is_empty() %}
-    <p class="muted">You should have everything you need.</p>
+    <p class="muted">{{ t.have_everything }}</p>
     {% else %}
     <ul class="plain-list">
       {% for item in recipe.shopping_optional %}

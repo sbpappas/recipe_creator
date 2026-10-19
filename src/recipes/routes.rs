@@ -14,6 +14,7 @@ use crate::{
         session::user_id_from_jar,
     },
     error::{render, AppError, AppResult},
+    i18n::{Lang, Strings},
     llm::{GeminiClient, GeneratedRecipe},
     pantry::routes::pantry_for_user,
     recipes::prompt::build_request,
@@ -23,6 +24,7 @@ use crate::{
 #[derive(Template)]
 #[template(path = "generate.html")]
 struct GenerateTemplate {
+    t: &'static Strings,
     username: Option<String>,
     pantry_count: usize,
     gemini_configured: bool,
@@ -32,6 +34,7 @@ struct GenerateTemplate {
 #[derive(Template)]
 #[template(path = "recipe.html")]
 struct RecipeTemplate {
+    t: &'static Strings,
     username: Option<String>,
     recipe: GeneratedRecipe,
     meal_type: String,
@@ -40,6 +43,7 @@ struct RecipeTemplate {
 #[derive(Template)]
 #[template(path = "history.html")]
 struct HistoryTemplate {
+    t: &'static Strings,
     username: Option<String>,
     recipes: Vec<HistoryItem>,
 }
@@ -81,6 +85,7 @@ async fn generate_page(
     let pantry = pantry_for_user(&state, user_id).await?;
 
     render(GenerateTemplate {
+        t: Lang::from_jar(&jar).t(),
         username: Some(username),
         pantry_count: pantry.len(),
         gemini_configured: state.config.gemini_api_key.is_some(),
@@ -94,9 +99,10 @@ async fn generate_recipe(
     Form(form): Form<GenerateForm>,
 ) -> Result<Response, AppError> {
     let user_id = user_id(&jar)?;
+    let t = Lang::from_jar(&jar).t();
 
     let Some(api_key) = state.config.gemini_api_key.clone() else {
-        return Ok(Redirect::to("/recipes/new?error=GEMINI_API_KEY+is+not+configured").into_response());
+        return Ok(Redirect::to("/recipes/new?error=gemini_not_configured").into_response());
     };
 
     let pantry = pantry_for_user(&state, user_id).await?;
@@ -105,6 +111,7 @@ async fn generate_recipe(
         pantry,
         &form.must_use,
         Some(form.notes),
+        t.recipe_language,
     );
 
     let client = GeminiClient::new(
@@ -116,7 +123,7 @@ async fn generate_recipe(
     let recipe = match client.generate_recipe(&request).await {
         Ok(recipe) => recipe,
         Err(e) => {
-            let message = e.to_string();
+            let message = t.llm_error(&e);
             let encoded = urlencoding::encode(&message);
             return Ok(Redirect::to(&format!("/recipes/new?error={encoded}")).into_response());
         }
@@ -162,6 +169,7 @@ async fn show_recipe(
         .map_err(|e| AppError::msg(format!("stored recipe is invalid: {e}")))?;
 
     render(RecipeTemplate {
+        t: Lang::from_jar(&jar).t(),
         username: Some(username),
         recipe,
         meal_type: row.meal_type,
@@ -193,6 +201,7 @@ async fn history_page(
         .collect();
 
     render(HistoryTemplate {
+        t: Lang::from_jar(&jar).t(),
         username: Some(username),
         recipes,
     })

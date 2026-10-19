@@ -6,6 +6,8 @@ pub struct RecipeRequest {
     pub pantry_staples: Vec<String>,
     pub must_use: Vec<String>,
     pub notes: Option<String>,
+    /// Language the recipe should be written in, e.g. "Spanish".
+    pub language: String,
 }
 
 pub fn build_request(
@@ -13,6 +15,7 @@ pub fn build_request(
     pantry_staples: Vec<String>,
     must_use_raw: &str,
     notes: Option<String>,
+    language: &str,
 ) -> RecipeRequest {
     let must_use = must_use_raw
         .split([',', '\n'])
@@ -26,6 +29,7 @@ pub fn build_request(
         pantry_staples,
         must_use,
         notes: notes.filter(|n| !n.trim().is_empty()),
+        language: language.to_string(),
     }
 }
 
@@ -40,9 +44,11 @@ mod tests {
             vec!["salt".into(), "rice".into()],
             "chicken, spinach",
             Some("quick meal".into()),
+            "Spanish",
         );
 
         assert_eq!(request.meal_type, "dinner");
         assert_eq!(request.must_use, vec!["chicken", "spinach"]);
+        assert_eq!(request.language, "Spanish");
     }
 }

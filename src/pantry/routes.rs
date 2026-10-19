@@ -14,6 +14,7 @@ use crate::{
         session::user_id_from_jar,
     },
     error::{render, AppError, AppResult},
+    i18n::{Lang, Strings},
     pantry::categories::{group_items, PantrySection},
     state::AppState,
 };
@@ -21,6 +22,7 @@ use crate::{
 #[derive(Template)]
 #[template(path = "pantry.html")]
 struct PantryTemplate {
+    t: &'static Strings,
     username: Option<String>,
     sections: Vec<PantrySection>,
     error: Option<String>,
@@ -49,10 +51,12 @@ async fn pantry_page(
     let user_id = user_id(&jar)?;
     let username = current_username(&state, user_id).await?;
     let items = list_pantry(&state, user_id).await?;
+    let lang = Lang::from_jar(&jar);
 
     render(PantryTemplate {
+        t: lang.t(),
         username: Some(username),
-        sections: group_items(items),
+        sections: group_items(items, lang),
         error: None,
     })
 }

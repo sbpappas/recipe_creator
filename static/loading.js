@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', function () {
       overlay.innerHTML = `
         <div class="loading-box" role="status" aria-live="polite">
           <div class="spinner-large" aria-hidden="true"></div>
-          <div class="loading-text">Thinking... this may take a minute</div>
+          <div class="loading-text"></div>
         </div>`;
+      overlay.querySelector('.loading-text').textContent =
+        document.documentElement.dataset.loadingText || 'Thinking... this may take a minute';
       document.body.appendChild(overlay);
     }
     overlay.classList.add('active');

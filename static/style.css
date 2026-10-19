@@ -108,6 +108,13 @@ a:hover {
   font-size: 0.95rem;
 }
 
+.site-header nav a.lang-switch {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
 .user {
   color: var(--muted);
   font-size: 0.9rem;
