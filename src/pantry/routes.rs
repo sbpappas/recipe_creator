@@ -14,6 +14,7 @@ use crate::{
         session::user_id_from_jar,
     },
     error::{render, AppError, AppResult},
+    pantry::categories::{group_items, PantrySection},
     state::AppState,
 };
 
@@ -21,7 +22,7 @@ use crate::{
 #[template(path = "pantry.html")]
 struct PantryTemplate {
     username: Option<String>,
-    items: Vec<String>,
+    sections: Vec<PantrySection>,
     error: Option<String>,
 }
 
@@ -51,7 +52,7 @@ async fn pantry_page(
 
     render(PantryTemplate {
         username: Some(username),
-        items,
+        sections: group_items(items),
         error: None,
     })
 }

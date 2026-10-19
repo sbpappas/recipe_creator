@@ -20,20 +20,25 @@
     <button type="submit">Add</button>
   </form>
 
-  {% if items.is_empty() %}
+  {% if sections.is_empty() %}
   <p class="empty">No staples yet. Add a few basics you always keep stocked.</p>
   {% else %}
-  <ul class="chip-list">
-    {% for item in items %}
-    <li class="chip">
-      <span>{{ item }}</span>
-      <form method="post" action="/pantry/delete">
-        <input type="hidden" name="name" value="{{ item }}">
-        <button type="submit" aria-label="Remove {{ item }}">×</button>
-      </form>
-    </li>
-    {% endfor %}
-  </ul>
+  {% for section in sections %}
+  <div class="pantry-section">
+    <h2>{{ section.name }} <span class="muted">({{ section.items.len() }})</span></h2>
+    <ul class="chip-list">
+      {% for item in section.items %}
+      <li class="chip">
+        <span>{{ item }}</span>
+        <form method="post" action="/pantry/delete">
+          <input type="hidden" name="name" value="{{ item }}">
+          <button type="submit" aria-label="Remove {{ item }}">×</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
   {% endif %}
 </section>
 {% endblock %}
