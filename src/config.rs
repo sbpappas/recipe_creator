@@ -7,6 +7,8 @@ pub struct Config {
     pub app_secret: String,
     pub gemini_api_key: Option<String>,
     pub gemini_model: String,
+    /// When set, new accounts must enter this code to register.
+    pub invite_code: Option<String>,
 }
 
 impl Config {
@@ -31,6 +33,10 @@ impl Config {
         let gemini_api_key = env::var("GEMINI_API_KEY").ok().filter(|k| !k.is_empty());
         let gemini_model =
             env::var("GEMINI_MODEL").unwrap_or_else(|_| "gemini-2.0-flash".into());
+        let invite_code = env::var("INVITE_CODE")
+            .ok()
+            .map(|c| c.trim().to_string())
+            .filter(|c| !c.is_empty());
 
         Ok(Self {
             port,
@@ -38,6 +44,7 @@ impl Config {
             app_secret,
             gemini_api_key,
             gemini_model,
+            invite_code,
         })
     }
 }

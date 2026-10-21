@@ -115,6 +115,7 @@ pub struct Strings {
     pub auth_intro: &'static str,
     pub username: &'static str,
     pub password: &'static str,
+    pub invite_code: &'static str,
     pub register_button: &'static str,
     pub login_button: &'static str,
     pub have_account: &'static str,
@@ -182,6 +183,10 @@ impl Strings {
             "username_taken" => (
                 "That username is already taken",
                 "Ese nombre de usuario ya está en uso",
+            ),
+            "invalid_invite" => (
+                "That invite code isn't right. Ask the person who shared the app with you.",
+                "Ese código de invitación no es correcto. Pídeselo a quien te compartió la aplicación.",
             ),
             "gemini_not_configured" => (
                 "GEMINI_API_KEY is not configured",
@@ -254,6 +259,7 @@ static EN: Strings = Strings {
     auth_intro: "Save your pantry staples and generate recipes from what you have on hand.",
     username: "Username",
     password: "Password",
+    invite_code: "Invite code",
     register_button: "Register",
     login_button: "Log in",
     have_account: "Already have an account?",
@@ -318,6 +324,7 @@ static ES: Strings = Strings {
     auth_intro: "Guarda tus productos básicos y genera recetas con lo que tienes en casa.",
     username: "Usuario",
     password: "Contraseña",
+    invite_code: "Código de invitación",
     register_button: "Registrarse",
     login_button: "Iniciar sesión",
     have_account: "¿Ya tienes una cuenta?",

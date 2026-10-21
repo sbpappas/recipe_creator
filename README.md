@@ -57,6 +57,26 @@ docker compose up --build
 
 The SQLite database is stored in `./data`.
 
+## Deploy to Fly.io (share with friends on any device)
+
+Hosting one copy online gives everyone a permanent `https://` link that works on phones and computers. Friends register their own accounts; recipes use your Gemini key.
+
+```bash
+brew install flyctl
+fly auth login
+fly launch --no-deploy            # reuses fly.toml; pick an app name and region
+fly volumes create pantry_data --size 1
+fly secrets set APP_SECRET=$(openssl rand -hex 32) GEMINI_API_KEY=your-key INVITE_CODE=pick-a-code
+fly deploy
+```
+
+Then send your friend the `https://<app>.fly.dev` link and the invite code. On a phone, use **Add to Home Screen** so it opens like an app.
+
+- The SQLite database lives on the `pantry_data` volume, so it survives deploys and restarts. Keep the app on a single machine.
+- The machine stops when idle and starts on the next visit, so the first page load after a quiet period takes a few seconds.
+- `fly logs` shows server output.
+- To reset someone's password on the server: `fly ssh console -C "reset_password <username>"`.
+
 ## Project structure
 
 - `src/` — Axum server, auth, pantry, recipes, Gemini client
@@ -91,6 +111,7 @@ For cross-platform binaries, use GitHub Actions or `cargo-zigbuild` to produce m
 | `PORT` | no | HTTP port (default `8090`) |
 | `DATABASE_URL` | no | SQLite URL (default `sqlite:data/recipe_creator.db?mode=rwc`) |
 | `GEMINI_MODEL` | no | Gemini model name (default `gemini-2.0-flash`) |
+| `INVITE_CODE` | no | If set, new accounts must enter this code to register |
 
 
 ## Password reset helper (this was a later fix to me forgetting my password)

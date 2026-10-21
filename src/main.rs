@@ -43,12 +43,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> { //turns on the loggi
     let public = Router::new()
         .merge(auth::routes::router())
         .merge(i18n::router())
+        .route("/health", get(|| async { "ok" })) // public so the host's health check can reach it
         .nest_service("/static", ServeDir::new("static"));
 
     let protected = Router::new()
         .merge(pantry::routes::router())
         .merge(recipes::routes::router())
-        .route("/health", get(|| async { "ok" }))
         .layer(middleware::from_fn_with_state(state.clone(), require_login)); // "security guaard" for protected routes
 
     //create app and merge public and protected routes

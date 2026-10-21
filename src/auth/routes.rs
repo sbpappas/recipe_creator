@@ -24,6 +24,7 @@ struct LoginTemplate {
     t: &'static Strings,
     username: Option<String>,
     mode: &'static str,
+    invite_required: bool,
     error: Option<String>,
 }
 
@@ -31,6 +32,8 @@ struct LoginTemplate {
 struct AuthForm {
     username: String,
     password: String,
+    #[serde(default)]
+    invite_code: String,
 }
 
 #[derive(Deserialize)]
@@ -54,20 +57,30 @@ async fn home(jar: PrivateCookieJar) -> Response {
     }
 }
 
-async fn login_page(jar: PrivateCookieJar, Query(query): Query<ErrorQuery>) -> AppResult<Response> {
+async fn login_page(
+    State(state): State<AppState>,
+    jar: PrivateCookieJar,
+    Query(query): Query<ErrorQuery>,
+) -> AppResult<Response> {
     render(LoginTemplate {
         t: Lang::from_jar(&jar).t(),
         username: None,
         mode: "login",
+        invite_required: state.config.invite_code.is_some(),
         error: query.error,
     })
 }
 
-async fn register_page(jar: PrivateCookieJar, Query(query): Query<ErrorQuery>) -> AppResult<Response> {
+async fn register_page(
+    State(state): State<AppState>,
+    jar: PrivateCookieJar,
+    Query(query): Query<ErrorQuery>,
+) -> AppResult<Response> {
     render(LoginTemplate {
         t: Lang::from_jar(&jar).t(),
         username: None,
         mode: "register",
+        invite_required: state.config.invite_code.is_some(),
         error: query.error,
     })
 }
@@ -110,6 +123,12 @@ async fn register(
 ) -> Result<Response, AppError> {
     let username = form.username.trim();
     let password = form.password.trim();
+
+    if let Some(code) = &state.config.invite_code {
+        if form.invite_code.trim() != code {
+            return Ok(Redirect::to("/register?error=invalid_invite").into_response());
+        }
+    }
 
     if username.len() < 3 {
         return Ok(

@@ -18,6 +18,12 @@
       {{ t.password }}
       <input type="password" name="password" required autocomplete="{% if mode == "register" %}new-password{% else %}current-password{% endif %}">
     </label>
+    {% if mode == "register" && invite_required %}
+    <label>
+      {{ t.invite_code }}
+      <input type="text" name="invite_code" required autocomplete="off">
+    </label>
+    {% endif %}
     <button type="submit" class="primary">{% if mode == "register" %}{{ t.register_button }}{% else %}{{ t.login_button }}{% endif %}</button>
   </form>
 

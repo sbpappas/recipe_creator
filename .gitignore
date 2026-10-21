@@ -1,7 +1,23 @@
+# Build output
 /target
-.env
-.env.example
-/data/*.db
-/data/*.db-*
 dist/
 
+# Secrets: real config lives in .env (see .env.example)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local SQLite data (user accounts, password hashes, pantry, recipes)
+/data/
+*.db
+*.db-*
+*.db.bak
+*.sqlite
+*.sqlite3
+
+# OS / editor clutter
+.DS_Store
+.vscode/
+.idea/
