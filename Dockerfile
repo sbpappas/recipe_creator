@@ -1,4 +1,4 @@
-FROM rust:1.83-bookworm AS builder
+FROM rust:1.96-bookworm AS builder
 
 WORKDIR /app
 COPY Cargo.toml Cargo.lock* ./
@@ -17,10 +17,10 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY --from=builder /app/target/release/recipe_creator /usr/local/bin/recipe_creator
+COPY --from=builder /app/target/release/reset_password /usr/local/bin/reset_password
 COPY migrations ./migrations
 COPY templates ./templates
 COPY static ./static
-COPY .env.example ./.env.example
 
 RUN mkdir -p /app/data
 
