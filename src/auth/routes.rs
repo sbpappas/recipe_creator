@@ -28,6 +28,14 @@ struct LoginTemplate {
     error: Option<String>,
 }
 
+#[derive(Template)]
+#[template(path = "landing.html")]
+struct LandingTemplate {
+    t: &'static Strings,
+    username: Option<String>,
+    invite_required: bool,
+}
+
 #[derive(Deserialize)]
 struct AuthForm {
     username: String,
@@ -49,12 +57,15 @@ pub fn router() -> Router<AppState> {
         .route("/logout", post(logout))
 }
 
-async fn home(jar: PrivateCookieJar) -> Response {
+async fn home(State(state): State<AppState>, jar: PrivateCookieJar) -> AppResult<Response> {
     if user_id_from_jar(&jar).is_some() {
-        Redirect::to("/pantry").into_response()
-    } else {
-        Redirect::to("/login").into_response()
+        return Ok(Redirect::to("/pantry").into_response());
     }
+    render(LandingTemplate {
+        t: Lang::from_jar(&jar).t(),
+        username: None,
+        invite_required: state.config.invite_code.is_some(),
+    })
 }
 
 async fn login_page(
@@ -166,7 +177,7 @@ async fn register(
 
 async fn logout(jar: PrivateCookieJar) -> Response {
     let jar = clear_user_cookie(jar);
-    (jar, Redirect::to("/login")).into_response()
+    (jar, Redirect::to("/")).into_response()
 }
 
 pub async fn current_username(state: &AppState, user_id: i64) -> AppResult<String> {
