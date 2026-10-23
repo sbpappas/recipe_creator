@@ -403,6 +403,168 @@ button:disabled {
   to { transform: rotate(360deg); }
 }
 
+/* Logged-out landing page */
+.landing-hero {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  padding: 3rem 0 3.5rem;
+}
+
+.landing-eyebrow {
+  margin: 0 0 1rem;
+  color: var(--accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.landing-copy h1 {
+  font-size: clamp(2.2rem, 5vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.25rem;
+}
+
+.landing-sub {
+  color: var(--muted);
+  font-size: 1.15rem;
+  max-width: 34rem;
+  margin: 0 0 2rem;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.landing-actions .button {
+  padding: 0.85rem 1.6rem;
+  text-decoration: none;
+}
+
+.landing-note {
+  margin: 1.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.landing-preview {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+}
+
+.preview-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.4rem;
+}
+
+.preview-pantry {
+  transform: rotate(-1.5deg);
+}
+
+.preview-recipe {
+  margin-left: 2.5rem;
+  transform: rotate(1deg);
+  border-left: 4px solid var(--accent);
+}
+
+.preview-label {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.preview-chip {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.95rem;
+}
+
+.preview-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.preview-note {
+  margin: 0;
+  color: var(--muted);
+}
+
+.landing-how {
+  padding: 2.5rem 0 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.landing-how h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.how-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.how-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.how-steps h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.how-steps p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.landing-closing {
+  margin: 2.5rem 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 760px) {
+  .landing-hero {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem 0 2.5rem;
+  }
+
+  .preview-recipe {
+    margin-left: 1.25rem;
+  }
+
+  .how-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .page-header {
     flex-direction: column;

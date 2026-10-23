@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Pantry Chef · {{ t.landing_title }}{% endblock %}
+{% block content %}
+<section class="landing-hero">
+  <div class="landing-copy">
+    <p class="landing-eyebrow">{{ t.landing_eyebrow }}</p>
+    <h1>{{ t.landing_headline }}</h1>
+    <p class="landing-sub">{{ t.landing_sub }}</p>
+    <div class="landing-actions">
+      <a class="button primary" href="/register">{{ t.get_started }}</a>
+      <a class="button" href="/login">{{ t.login_button }}</a>
+    </div>
+    {% if invite_required %}
+    <p class="landing-note">{{ t.invite_note }}</p>
+    {% endif %}
+  </div>
+
+  <div class="landing-preview" aria-hidden="true">
+    <div class="preview-card preview-pantry">
+      <p class="preview-label">{{ t.sample_pantry }}</p>
+      <ul class="chip-list">
+        {% for chip in t.sample_chips.iter() %}
+        <li class="chip preview-chip">{{ chip }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="preview-card preview-recipe">
+      <p class="preview-label">{{ t.sample_recipe_meta }}</p>
+      <p class="preview-title">{{ t.sample_recipe_title }}</p>
+      <p class="preview-note">{{ t.sample_recipe_note }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="landing-how">
+  <h2>{{ t.how_title }}</h2>
+  <ol class="how-steps">
+    {% for (title, body) in t.steps_how.iter() %}
+    <li>
+      <span class="how-number">{{ loop.index }}</span>
+      <h3>{{ title }}</h3>
+      <p>{{ body }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<p class="landing-closing">{{ t.closing_line }}</p>
+{% endblock %}

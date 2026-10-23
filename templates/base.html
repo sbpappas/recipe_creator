@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Pantry Chef{% endblock %}</title>
-  <link rel="stylesheet" href="/static/style.css?v=20261018">
+  <link rel="stylesheet" href="/static/style.css?v=20261022">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-  <script src="/static/loading.js?v=20261018"></script>
+  <script src="/static/loading.js?v=20261022"></script>
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/pantry">Pantry Chef</a>
+    <a class="brand" href="/">Pantry Chef</a>
     <nav>
       {% if username.is_some() %}
       <a href="/pantry">{{ t.nav_pantry }}</a>
@@ -20,6 +20,8 @@
       <form method="post" action="/logout" class="inline-form">
         <button type="submit" class="link-button">{{ t.log_out }}</button>
       </form>
+      {% else %}
+      <a href="/login">{{ t.login_button }}</a>
       {% endif %}
       <a class="lang-switch" href="/lang/{{ t.switch_code }}" lang="{{ t.switch_code }}">{{ t.switch_label }}</a>
     </nav>
