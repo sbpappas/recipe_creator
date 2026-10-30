@@ -18,7 +18,7 @@
     <li>
       <a href="/recipes/{{ recipe.id }}">
         <span class="history-title">{{ recipe.title }}</span>
-        <span class="history-meta">{{ t.meal_type(recipe.meal_type.as_str()) }} · {{ recipe.created_at }}</span>
+        <span class="history-meta">{{ t.meal_type(recipe.meal_type.as_str()) }} · {{ t.date(recipe.created_at.as_str()) }}</span>
       </a>
     </li>
     {% endfor %}

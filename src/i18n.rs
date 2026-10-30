@@ -160,6 +160,31 @@ impl Strings {
         }
     }
 
+    /// Formats a SQLite timestamp ("2026-10-21 03:02:11") as "Oct 21, 2026" / "21 oct 2026".
+    /// Anything that doesn't parse is shown unchanged.
+    pub fn date(&self, timestamp: &str) -> String {
+        const EN_MONTHS: [&str; 12] = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        ];
+        const ES_MONTHS: [&str; 12] = [
+            "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic",
+        ];
+
+        let mut parts = timestamp.get(..10).unwrap_or("").split('-');
+        let parsed = (|| {
+            let year: u32 = parts.next()?.parse().ok()?;
+            let month: usize = parts.next()?.parse().ok()?;
+            let day: u32 = parts.next()?.parse().ok()?;
+            (1..=12).contains(&month).then_some((year, month - 1, day))
+        })();
+
+        match (parsed, self.lang) {
+            (Some((year, month, day)), Lang::En) => format!("{} {day}, {year}", EN_MONTHS[month]),
+            (Some((year, month, day)), Lang::Es) => format!("{day} {} {year}", ES_MONTHS[month]),
+            (None, _) => timestamp.to_string(),
+        }
+    }
+
     pub fn meal_type<'a>(&self, code: &'a str) -> &'a str {
         let (en, es) = match code {
             "breakfast" => ("Breakfast", "Desayuno"),
@@ -396,3 +421,16 @@ static ES: Strings = Strings {
     optional_shopping: "Compras opcionales",
     have_everything: "Deberías tener todo lo necesario.",
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn formats_dates_per_language() {
+        assert_eq!(Lang::En.t().date("2026-10-21 03:02:11"), "Oct 21, 2026");
+        assert_eq!(Lang::Es.t().date("2026-10-21 03:02:11"), "21 oct 2026");
+        assert_eq!(Lang::En.t().date("2026-01-05 12:00:00"), "Jan 5, 2026");
+        assert_eq!(Lang::En.t().date("not a date"), "not a date");
+    }
+}

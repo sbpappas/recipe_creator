@@ -353,7 +353,6 @@ button:disabled {
   display: block;
   color: var(--muted);
   font-size: 0.9rem;
-  text-transform: capitalize;
 }
 
 .actions {
