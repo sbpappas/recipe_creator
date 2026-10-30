@@ -48,6 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> { //turns on the loggi
 
     let protected = Router::new()
         .merge(pantry::routes::router())
+        .merge(auth::account::router())
         .merge(recipes::routes::router())
         .layer(middleware::from_fn_with_state(state.clone(), require_login)); // "security guaard" for protected routes
 

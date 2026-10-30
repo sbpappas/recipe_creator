@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ t.account_title }} · Pantry Chef{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>{{ t.account_title }}</h1>
+    <p class="muted">{{ t.signed_in_as }} <strong>{{ username.as_ref().unwrap() }}</strong></p>
+  </div>
+</section>
+
+{% if password_changed %}
+<div class="notice" role="status">{{ t.password_changed }}</div>
+{% endif %}
+
+{% if error.is_some() %}
+<div class="alert">{{ t.error(error.as_ref().unwrap()) }}</div>
+{% endif %}
+
+<section class="card account-card">
+  <h2>{{ t.change_password }}</h2>
+  <form method="post" action="/account/password">
+    <label>
+      {{ t.current_password }}
+      <input type="password" name="current_password" required autocomplete="current-password">
+    </label>
+    <label>
+      {{ t.new_password }} <span class="muted">{{ t.password_hint }}</span>
+      <input type="password" name="new_password" required minlength="6" autocomplete="new-password">
+    </label>
+    <label>
+      {{ t.confirm_password }}
+      <input type="password" name="confirm_password" required minlength="6" autocomplete="new-password">
+    </label>
+    <button type="submit" class="primary">{{ t.update_password }}</button>
+  </form>
+</section>
+{% endblock %}

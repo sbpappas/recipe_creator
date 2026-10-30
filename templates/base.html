@@ -16,7 +16,7 @@
       <a href="/pantry">{{ t.nav_pantry }}</a>
       <a href="/recipes/new">{{ t.nav_generate }}</a>
       <a href="/recipes/history">{{ t.nav_history }}</a>
-      <span class="user">{{ username.as_ref().unwrap() }}</span>
+      <a class="user" href="/account" title="{{ t.account_title }}">{{ username.as_ref().unwrap() }}</a>
       <form method="post" action="/logout" class="inline-form">
         <button type="submit" class="link-button">{{ t.log_out }}</button>
       </form>

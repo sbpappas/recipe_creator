@@ -9,6 +9,9 @@
   --accent-dark: #8f3a22;
   --alert-bg: #fdecea;
   --alert-text: #8a2f24;
+  --notice-bg: #edf5ec;
+  --notice-text: #2f5a2c;
+  --notice-border: #c9dfc5;
   --shadow: 0 10px 30px rgba(31, 26, 23, 0.08);
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
@@ -269,6 +272,19 @@ button:disabled {
   border-radius: 12px;
   padding: 0.85rem 1rem;
   margin-bottom: 1rem;
+}
+
+.notice {
+  background: var(--notice-bg);
+  color: var(--notice-text);
+  border: 1px solid var(--notice-border);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.account-card {
+  max-width: 480px;
 }
 
 .empty {

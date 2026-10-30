@@ -1,3 +1,4 @@
+pub mod account;
 pub mod middleware;
 pub mod password;
 pub mod routes;
