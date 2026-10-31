@@ -264,8 +264,9 @@ impl Strings {
                 LlmError::QuotaExceeded => "Se agotó la cuota de Gemini. Se terminó la asignación gratuita de este modelo. Inténtalo más tarde o cambia a otro modelo.".to_string(),
                 LlmError::BadResponse => "Gemini devolvió una respuesta inesperada. Inténtalo de nuevo.".to_string(),
                 LlmError::InvalidJson => "No se pudo leer la receta de Gemini. Inténtalo de nuevo.".to_string(),
-                LlmError::Network(e) => format!("Error de red al comunicarse con Gemini: {e}"),
-                LlmError::Api(message) => format!("Error de Gemini: {message}"),
+                LlmError::Busy => "Gemini está muy ocupado en este momento. Inténtalo de nuevo en un momento.".to_string(),
+                LlmError::Network => "No se pudo conectar con Gemini. Revisa tu conexión e inténtalo de nuevo.".to_string(),
+                LlmError::Api { status, message } => format!("Gemini no pudo crear la receta (HTTP {status}): {message}"),
             },
         }
     }

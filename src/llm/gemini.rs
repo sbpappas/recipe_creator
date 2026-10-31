@@ -1,21 +1,34 @@
-use reqwest::Client;
+use std::time::Duration;
+
+use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::recipes::prompt::RecipeRequest;
 
+/// How many times to try a request that fails with a temporary problem (Gemini busy, network blip).
+const MAX_ATTEMPTS: u32 = 3;
+/// Wait before each retry: 1s, then 3s.
+const RETRY_DELAYS: [Duration; 2] = [Duration::from_secs(1), Duration::from_secs(3)];
+/// Recipes can take a while to generate, but don't hang forever.
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(90);
+
+/// User-facing messages are kept short and free of raw API output; details go to the server log.
 #[derive(Debug, Error)]
 pub enum LlmError {
     #[error("Gemini quota exceeded. Your current free-tier allowance for this model has been exhausted. Try again later or switch to a different model.")]
     QuotaExceeded,
+    #[error("Gemini is busy right now. Please try again in a moment.")]
+    Busy,
+    #[error("Couldn't reach Gemini. Check your connection and try again.")]
+    Network,
     #[error("Gemini returned an unexpected response. Try again.")]
     BadResponse,
     #[error("Could not parse recipe from Gemini. Try again.")]
     InvalidJson,
-    #[error("Network error talking to Gemini: {0}")]
-    Network(#[from] reqwest::Error),
-    #[error("Gemini error: {0}")]
-    Api(String),
+    /// A non-temporary error, e.g. an invalid API key or model name. Holds Google's one-line message.
+    #[error("Gemini couldn't create a recipe (HTTP {status}): {message}")]
+    Api { status: u16, message: String },
 }
 
 #[derive(Clone)]
@@ -38,9 +51,10 @@ impl GeminiClient {
         &self,
         request: &RecipeRequest,
     ) -> Result<GeneratedRecipe, LlmError> {
+        // The key goes in a header, not the URL, so it can't leak through error messages or logs.
         let url = format!(
-            "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
-            self.model, self.api_key
+            "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent",
+            self.model
         );
 
         let body = GeminiRequest {
@@ -59,18 +73,21 @@ impl GeminiClient {
             },
         };
 
-        let response = self.http.post(&url).json(&body).send().await?;
-        let status = response.status();
-        let bytes = response.bytes().await?;
-        let text = String::from_utf8_lossy(&bytes).into_owned();
-
-        if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
-            return Err(LlmError::QuotaExceeded);
-        }
-
-        if !status.is_success() {
-            return Err(LlmError::Api(format!("Gemini error: {}", describe_response(status, &text))));
-        }
+        let mut attempt = 1;
+        let bytes = loop {
+            let error = match self.send(&url, &body).await {
+                Ok(bytes) => break bytes,
+                Err(error) => error,
+            };
+            let retryable = matches!(error, LlmError::Busy | LlmError::Network);
+            if !retryable || attempt >= MAX_ATTEMPTS {
+                return Err(error);
+            }
+            let delay = RETRY_DELAYS[(attempt - 1) as usize];
+            tracing::info!("gemini attempt {attempt} failed ({error}); retrying in {delay:?}");
+            tokio::time::sleep(delay).await;
+            attempt += 1;
+        };
 
         let payload: GeminiResponse = serde_json::from_slice(&bytes).map_err(|_| LlmError::BadResponse)?;
 
@@ -84,6 +101,57 @@ impl GeminiClient {
 
         serde_json::from_str(&text).map_err(|_| LlmError::InvalidJson)
     }
+
+    /// Sends one request and returns the raw response body, or a classified error.
+    async fn send(&self, url: &str, body: &GeminiRequest) -> Result<Vec<u8>, LlmError> {
+        let network_error = |e: reqwest::Error| {
+            tracing::warn!("gemini network error: {}", e.without_url());
+            LlmError::Network
+        };
+
+        let response = self
+            .http
+            .post(url)
+            .header("x-goog-api-key", &self.api_key)
+            .timeout(REQUEST_TIMEOUT)
+            .json(body)
+            .send()
+            .await
+            .map_err(network_error)?;
+        let status = response.status();
+        let bytes = response.bytes().await.map_err(network_error)?;
+
+        if status.is_success() {
+            return Ok(bytes.to_vec());
+        }
+
+        let body_text = String::from_utf8_lossy(&bytes);
+        tracing::warn!("gemini returned HTTP {status}: {}", body_text.trim());
+        Err(classify_error(status, &body_text))
+    }
+}
+
+/// Maps a failed HTTP response to an error. 5xx errors are temporary on Google's side.
+fn classify_error(status: StatusCode, body: &str) -> LlmError {
+    if status == StatusCode::TOO_MANY_REQUESTS {
+        LlmError::QuotaExceeded
+    } else if status.is_server_error() {
+        LlmError::Busy
+    } else {
+        LlmError::Api {
+            status: status.as_u16(),
+            message: api_error_message(body).unwrap_or_else(|| {
+                status.canonical_reason().unwrap_or("unknown error").to_string()
+            }),
+        }
+    }
+}
+
+/// Pulls the human-readable message out of Google's error JSON: {"error": {"message": "..."}}.
+fn api_error_message(body: &str) -> Option<String> {
+    let json: serde_json::Value = serde_json::from_str(body).ok()?;
+    let message = json.get("error")?.get("message")?.as_str()?.trim();
+    (!message.is_empty()).then(|| message.to_string())
 }
 
 fn system_prompt() -> String {
@@ -104,15 +172,6 @@ fn user_prompt(request: &RecipeRequest) -> String {
         serde_json::to_string_pretty(request).unwrap_or_default(),
         RECIPE_SCHEMA
     )
-}
-
-fn describe_response(status: reqwest::StatusCode, body: &str) -> String {
-    let trimmed = body.trim();
-    if trimmed.is_empty() {
-        format!("HTTP {status}")
-    } else {
-        format!("HTTP {status}: {trimmed}")
-    }
 }
 
 const RECIPE_SCHEMA: &str = r#"{
@@ -201,10 +260,24 @@ mod tests {
     }
 
     #[test]
-    fn describe_response_includes_status_and_body() {
-        let message = super::describe_response(reqwest::StatusCode::TOO_MANY_REQUESTS, r#"{"error":{"message":"Quota exceeded"}}"#);
+    fn classifies_errors_into_friendly_messages() {
+        use super::{classify_error, LlmError};
+        use reqwest::StatusCode;
 
-        assert!(message.contains("429"));
-        assert!(message.contains("Quota exceeded"));
+        let overloaded = r#"{"error":{"code":503,"message":"This model is currently experiencing high demand.","status":"UNAVAILABLE"}}"#;
+        assert!(matches!(classify_error(StatusCode::SERVICE_UNAVAILABLE, overloaded), LlmError::Busy));
+        assert!(matches!(classify_error(StatusCode::INTERNAL_SERVER_ERROR, ""), LlmError::Busy));
+        assert!(matches!(classify_error(StatusCode::TOO_MANY_REQUESTS, ""), LlmError::QuotaExceeded));
+
+        let bad_key = r#"{"error":{"code":400,"message":"API key not valid. Please pass a valid API key.","status":"INVALID_ARGUMENT"}}"#;
+        let error = classify_error(StatusCode::BAD_REQUEST, bad_key);
+        assert_eq!(
+            error.to_string(),
+            "Gemini couldn't create a recipe (HTTP 400): API key not valid. Please pass a valid API key."
+        );
+
+        // No JSON body: fall back to the status text instead of showing nothing (or raw HTML).
+        let error = classify_error(StatusCode::NOT_FOUND, "<html>not found</html>");
+        assert_eq!(error.to_string(), "Gemini couldn't create a recipe (HTTP 404): Not Found");
     }
 }
